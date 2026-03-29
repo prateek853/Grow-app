@@ -46,6 +46,16 @@ function getLast7Days() {
   });
 }
 
+// 🔑 PASTE YOUR ANTHROPIC API KEY BELOW (replace the text inside the quotes)
+const ANTHROPIC_API_KEY = "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";
+
+const API_HEADERS = {
+  "Content-Type": "application/json",
+  "x-api-key": ANTHROPIC_API_KEY,
+  "anthropic-version": "2023-06-01",
+  "anthropic-dangerous-direct-browser-access": "true",
+};
+
 async function callClaude(messages, systemPrompt, tools) {
   const body = {
     model: "claude-sonnet-4-20250514",
@@ -56,7 +66,7 @@ async function callClaude(messages, systemPrompt, tools) {
   if (tools) body.tools = tools;
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: API_HEADERS,
     body: JSON.stringify(body),
   });
   const data = await res.json();
@@ -71,7 +81,7 @@ Return ONLY the raw JSON array, no markdown, no explanation.`;
   const tools = [{ type: "web_search_20250305", name: "web_search" }];
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: API_HEADERS,
     body: JSON.stringify({
       model: "claude-sonnet-4-20250514",
       max_tokens: 2000,
@@ -318,7 +328,6 @@ export default function App() {
         </div>
 
         <div style={s.content} key={tab}>
-
           {tab === "today" && (
             <div className="fade-up">
               <div style={s.weekStrip}>
