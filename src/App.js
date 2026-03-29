@@ -620,7 +620,7 @@ const s = {
   navBtn: { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "6px 4px 4px", border: "none", borderRadius: 12, background: "transparent", cursor: "pointer" },
   navBtnActive: { boxShadow: "0 4px 16px rgba(0,0,0,0.4)" },
   navLabel: { fontSize: 9.5, fontFamily: "DM Sans", fontWeight: 500, letterSpacing: 0.2 },
-  content: { padding: "24px 20px 0", maxWidth: 480, margin: "0 auto" },
+  content: { padding: "24px 20px 0", maxWidth: 480, margin: "0 auto", minHeight: "calc(100vh - 280px)" },
   weekStrip: { display: "flex", justifyContent: "space-between", background: "rgba(255,255,255,0.03)", borderRadius: 16, padding: "14px 12px", marginBottom: 24, border: "1px solid rgba(255,255,255,0.05)" },
   weekCol: { display: "flex", flexDirection: "column", alignItems: "center", gap: 8 },
   weekDay: { fontSize: 10, color: "#444", fontFamily: "DM Sans", fontWeight: 600, letterSpacing: 0.5 },
