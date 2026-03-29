@@ -74,28 +74,40 @@ async function callClaude(messages, systemPrompt, tools) {
 }
 
 async function fetchVCArticles() {
-  const dateStr = today.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-  const system = `You are a VC and startup news curator. Use web search to find 6 real, current articles from today or this week about venture capital, startups, and tech funding.
-For each article return a JSON array. Each item must have: title, source, tag (one of: Funding, Startups, AI, Markets, Founders), summary (2 sentences, plain text), url, readTime.
-Return ONLY the raw JSON array, no markdown, no explanation.`;
-  const tools = [{ type: "web_search_20250305", name: "web_search" }];
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: API_HEADERS,
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 2000,
-      system,
-      tools,
-      messages: [{ role: "user", content: `Today is ${dateStr}. Find 6 latest VC/startup articles as JSON array.` }],
-    }),
-  });
-  const data = await res.json();
-  const raw = data.content?.find((b) => b.type === "text")?.text || "";
+  // Curated VC & startup articles — refreshed regularly
+  const feeds = [
+    { url: "https://api.rss2json.com/v1/api.json?rss_url=https://techcrunch.com/feed/", source: "TechCrunch" },
+    { url: "https://api.rss2json.com/v1/api.json?rss_url=https://venturebeat.com/feed/", source: "VentureBeat" },
+  ];
+
+  const tagMap = (title) => {
+    const t = title.toLowerCase();
+    if (t.includes("fund") || t.includes("raise") || t.includes("million") || t.includes("billion")) return "Funding";
+    if (t.includes("ai") || t.includes("artificial intelligence") || t.includes("gpt") || t.includes("model")) return "AI";
+    if (t.includes("founder") || t.includes("ceo") || t.includes("startup story")) return "Founders";
+    if (t.includes("market") || t.includes("ipo") || t.includes("valuation") || t.includes("stock")) return "Markets";
+    return "Startups";
+  };
+
   try {
-    const clean = raw.replace(/```json|```/g, "").trim();
-    const s = clean.indexOf("["), e = clean.lastIndexOf("]");
-    return JSON.parse(clean.slice(s, e + 1));
+    const results = await Promise.all(
+      feeds.map((f) => fetch(f.url).then((r) => r.json()).then((d) => ({ ...d, source: f.source })).catch(() => null))
+    );
+    const articles = [];
+    for (const feed of results) {
+      if (!feed?.items) continue;
+      for (const item of feed.items.slice(0, 4)) {
+        articles.push({
+          title: item.title,
+          source: feed.source,
+          tag: tagMap(item.title),
+          summary: item.description?.replace(/<[^>]+>/g, "").slice(0, 180).trim() + "…" || "Read the full article for details.",
+          url: item.link,
+          readTime: `${Math.ceil((item.description?.split(" ").length || 200) / 200)} min read`,
+        });
+      }
+    }
+    return articles.slice(0, 6);
   } catch { return null; }
 }
 
