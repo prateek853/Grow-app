@@ -47,7 +47,7 @@ function getLast7Days() {
 }
 
 // 🔑 PASTE YOUR ANTHROPIC API KEY BELOW (replace the text inside the quotes)
-const ANTHROPIC_API_KEY = "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";
+const ANTHROPIC_API_KEY = "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";
 
 const API_HEADERS = {
   "Content-Type": "application/json",
